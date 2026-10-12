@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>日语专业学习工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#0d0f1a;color:#e2e8ff;line-height:1.6;font-size:14px}
+header{padding:14px 16px;border-bottom:1px solid #262b4a;background:linear-gradient(135deg,#1a1f3a,#2a1f3a)}
+h1{font-size:17px} .sub{opacity:.6;font-size:11px}
+nav{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid #262b4a;flex-wrap:wrap;background:#11142a}
+nav button{flex:1;min-width:70px;padding:7px 4px;border-radius:7px;background:transparent;border:1px solid #262b4a;color:#e2e8ff;cursor:pointer;font-size:11px}
+nav button.active{border-color:#37c2ff;background:#1a2240}
+.tab{display:none;padding:12px;max-width:1100px;margin:0 auto}
+.tab.active{display:block}
+.card{background:#161a2e;border:1px solid #262b4a;border-radius:12px;padding:12px;margin-bottom:12px}
+.card h2{font-size:14px;color:#37c2ff;margin-bottom:8px}
+.card h3{font-size:13px;color:#a78bfa;margin:8px 0 4px}
+button{background:#1e2545;border:1px solid #262b4a;color:#e2e8ff;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px;margin:2px}
+button:hover{border-color:#37c2ff}
+input,select,textarea{width:100%;background:#0a0c18;color:#e2e8ff;border:1px solid #262b4a;border-radius:7px;padding:7px;margin:3px 0;font-size:13px}
+.tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:99px;background:#2a1f4a;color:#d4c5ff;margin:2px}
+.tag.n1{background:#4a1f2a;color:#ffb4c8}
+.tag.n2{background:#2a3a1f;color:#b4ffc8}
+.progress{height:5px;background:#1e2545;border-radius:99px;overflow:hidden;margin:4px 0}
+.progress>i{display:block;height:100%;background:linear-gradient(90deg,#ff5a8a,#37c2ff)}
+.word-display{font-size:28px;font-weight:700;color:#ff5a8a}
+.reading{font-size:16px;color:#37c2ff;margin:3px 0}
+.example{font-size:12px;padding:7px;background:#0a0c18;border-radius:7px;margin:3px 0;border-left:3px solid #a78bfa}
+iframe{border:0;border-radius:8px;width:100%;height:240px;margin:4px 0}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.stats-bar{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;opacity:.8;margin-top:4px}
+.stats-bar span{background:#1a1f3a;padding:2px 8px;border-radius:99px}
+.scene-card{padding:8px;background:#0a0c18;border-radius:7px;margin:4px 0;border:1px solid #262b4a}
+.scene-card .jp{font-size:14px;color:#37c2ff}
+.scene-card .cn{font-size:11px;opacity:.7}
+a{color:#37c2ff}
+</style>
+</head>
+<body>
+<header>
+  <h1>🇯🇵 日语专业学习工作台</h1>
+  <div class="sub">N1单词 · N3+会话 · NHK/B站 · 一站式训练</div>
+  <div class="progress"><i id="dayBar" style="width:0%"></i></div>
+  <div class="stats-bar">
+    <span id="dayCount">🔥 0天</span>
+    <span id="totalTime">⏱ 0分</span>
+    <span id="totalXP">⭐ 0</span>
+    <span id="userLevel">Lv.1</span>
+  </div>
+</header>
+<nav>
+  <button class="active" onclick="showTab('vocab',this)">📚单词</button>
+  <button onclick="showTab('listen',this)">🎧听力</button>
+  <button onclick="showTab('speak',this)">🎤会话</button>
+  <button onclick="showTab('read',this)">📝读写</button>
+  <button onclick="showTab('kanji',this)">🖊️汉字</button>
+  <button onclick="showTab('game',this)">🎮闯关</button>
+  <button onclick="showTab('stats',this)">📊打卡</button>
+</nav>
+
+<div id="vocab" class="tab active">
+  <div class="card">
+    <h2>📚 单词（N1/N2/N3）</h2>
+    <div class="row">
+      <select id="vLevel"><option value="n1">N1</option><option value="n2">N2</option><option value="n3">N3</option></select>
+      <button onclick="drawWord()">🎲 抽词</button>
+      <button onclick="playSound()">🔊 发音</button>
+      <a id="jisho" href="#" target="_blank">Jisho ↗</a>
+    </div>
+    <div id="wordArea" class="word-display">点击抽词</div>
+    <div id="readingArea" class="reading"></div>
+    <div id="meaningArea"></div>
+    <div id="quizArea"></div>
+  </div>
+</div>
+
+<div id="listen" class="tab">
+  <div class="card">
+    <h2>🎧 NHK Easy 新闻</h2>
+    <button onclick="openNHK()">📰 打开 NHK Easy</button>
+    <div class="example"><a href="https://www3.nhk.or.jp/news/easy/" target="_blank">https://www3.nhk.or.jp/news/easy/</a><br>真实简体日语新闻，带假名注音</div>
+  </div>
+  <div class="card">
+    <h2>🎬 B站日剧学日语</h2>
+    <select id="bvid"><option value="BV1GJ411x7h7">孤独的美食家</option><option value="BV1xx411c7mD">四重奏·敬语</option><option value="BV1QK411L7Jw">半泽直树</option></select>
+    <button onclick="loadBili()">▶ 加载</button>
+    <div id="biliArea"></div>
+  </div>
+</div>
+
+<div id="speak" class="tab">
+  <div class="card">
+    <h2>🎤 会话场景（N3+）</h2>
+    <select id="sceneSel" onchange="loadScene()"><option value="biz">💼 商务</option><option value="keigo">🙇 敬语</option><option value="interview">📋 面试</option><option value="dining">🍽 点餐</option></select>
+    <button onclick="loadScene()">加载</button>
+    <div id="sceneArea"></div>
+  </div>
+</div>
+
+<div id="read" class="tab">
+  <div class="card">
+    <h2>📝 写作练习</h2>
+    <div class="example">用今日语法写一段日文，点击评分</div>
+    <textarea id="writing" rows="4" placeholder="ここに書いてください..."></textarea>
+    <button onclick="gradeWriting()">📊 评分</button>
+    <div id="gradeArea"></div>
+  </div>
+</div>
+
+<div id="kanji" class="tab">
+  <div class="card">
+    <h2>🖊️ 汉字</h2>
+    <button onclick="drawKanji()">🎲 抽字</button>
+    <div id="kanjiArea" class="word-display"></div>
+  </div>
+</div>
+
+<div id="game" class="tab">
+  <div class="card">
+    <h2>🎮 闯关</h2>
+    <button onclick="startGame()">🎯 开始</button>
+    <div id="gameArea"></div>
+  </div>
+</div>
+
+<div id="stats" class="tab">
+  <div class="card">
+    <h2>📊 打卡</h2>
+    <div id="statsArea"></div>
+    <h3>🎁 奖励</h3>
+    <div id="rewardsArea"></div>
+  </div>
+</div>
+
+<script>
+let curWord={},study={days:0,xp:0,level:1},todayMin=0;
+const n1Words=[{w:"承る",r:"うけたまわる",m:"接受(谦)"},{w:"発足",r:"ほっそく",m:"成立"},{w:"精緻",r:"せいち",m:"精致"},{w:"阻む",r:"はばむ",m:"阻碍"},{w:"穏便",r:"おんびん",m:"和平"},{w:"陶冶",r:"とうや",m:"熏陶"},{w:"手厚い",r:"てあつい",m:"热情"},{w:"相俟って",r:"あいまって",m:"配合"}];
+const n2Words=[{w:"承認",r:"しょうにん",m:"承认"},{w:"展開",r:"てんかい",m:"展开"},{w:"配慮",r:"はいりょ",m:"关怀"},{w:"主張",r:"しゅちょう",m:"主张"},{w:"妥協",r:"だきょう",m:"妥协"}];
+const n3Words=[{w:"工夫",r:"くふう",m:"想办法"},{w:"迷惑",r:"めいわく",m:"麻烦"},{w:"我慢",r:"がまん",m:"忍耐"},{w:"都合",r:"つごう",m:"方便"},{w:"気分",r:"きぶん",m:"心情"}];
+
+function showTab(id,btn){document.querySelectorAll('.tab').forEach(t=>t.style.display='none');document.getElementById(id).style.display='block';document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
+
+function drawWord(){
+  const lv=document.getElementById('vLevel').value;
+  const pool=lv==='n1'?n1Words:lv==='n2'?n2Words:n3Words;
+  curWord=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('wordArea').textContent=curWord.w;
+  document.getElementById('readingArea').textContent=curWord.r;
+  document.getElementById('meaningArea').textContent=curWord.m;
+  document.getElementById('jisho').href='https://jisho.org/search/'+encodeURIComponent(curWord.w);
+  let q='';for(let i=0;i<3;i++){const o=pool[Math.floor(Math.random()*pool.length)];q+=`<button onclick="checkQ('${o.m}')">${o.m}</button>`;}
+  document.getElementById('quizArea').innerHTML=q;
+  todayMin+=1;updateBar();
+}
+function checkQ(ans){alert(ans===curWord.m?'✅ 对！':'❌ 错！答案：'+curWord.m);}
+function playSound(){if(curWord.r&&'speechSynthesis'in window){const u=new SpeechSynthesisUtterance(curWord.r);u.lang='ja-JP';speechSynthesis.speak(u);}}
+
+function openNHK(){window.open('https://www3.nhk.or.jp/news/easy/','_blank');todayMin+=5;updateBar();}
+function loadBili(){const bv=document.getElementById('bvid').value;document.getElementById('biliArea').innerHTML=`<iframe src="https://player.bilibili.com/player.html?bvid=${bv}&danmaku=0"></iframe>`;todayMin+=10;updateBar();}
+
+const scenes={biz:[{j:"本日はお忙しい中ありがとうございます。",c:"感谢百忙中参会"},{j:"各部署の進捗を確認したいと思います。",c:"想确认各部门进度"}],keigo:[{j:"お世話になっております。",c:"承蒙关照"},{j:"お時間をいただきありがとうございます。",c:"感谢抽出时间"}],interview:[{j:"志望動機をお願いします。",c:"请说应聘动机"},{j:"御社の理念に共感しました。",c:"对贵公司理念有共鸣"}],dining:[{j:"ご予約のお名前を。",c:"预约姓名"},{j:"おすすめは何ですか？",c:"推荐什么？"}]};
+function loadScene(){const k=document.getElementById('sceneSel').value;let h='';scenes[k].forEach(l=>{h+=`<div class="scene-card"><div class="jp">${l.j}</div><div class="cn">${l.c}</div></div>`;});document.getElementById('sceneArea').innerHTML=h;todayMin+=5;updateBar();}
+
+function gradeWriting(){const t=document.getElementById('writing').value;if(!t){alert('先写点什么');return;}let s=60;if(t.length>20)s+=15;if(/〜/.test(t))s+=10;document.getElementById('gradeArea').innerHTML=`<div class="example">📊 ${Math.min(s,95)}/100<br>${s>=80?'🌟 不错！':'💡 多练练'}</div>`;todayMin+=5;updateBar();}
+
+function drawKanji(){const k=['鬱','摯','遙','辣','寡','渇','惧','坂','枠'];const c=k[Math.floor(Math.random()*k.length)];document.getElementById('kanjiArea').textContent=c;todayMin+=2;updateBar();}
+
+function startGame(){document.getElementById('gameArea').innerHTML=`<div class="example">🎯 得分:${Math.floor(Math.random()*50+50)} | 继续闯关...</div>`;}
+
+function updateBar(){document.getElementById('totalTime').textContent='⏱ '+todayMin+'分';document.getElementById('dayBar').style.width=Math.min(todayMin/135 * 100,100)+'%';document.getElementById('totalXP').textContent='⭐ '+todayMin*2;}
+
+// 初始化
+updateBar();
+drawWord();
+loadScene();
+const rewards=[5,10,15,20,25,30].map(d=>`<span class="tag">Day${d}:${d<=study.days?'✅':'🔒'}</span>`).join(' ');
+document.getElementById('rewardsArea').innerHTML=rewards;
+document.getElementById('statsArea').innerHTML=`<div>🔥 连续:${study.days}天 | ⭐ XP:${study.xp} | Lv:${study.level}</div>`;
+</script>
+</body>
+</html>
